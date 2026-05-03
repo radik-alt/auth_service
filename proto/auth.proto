@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/radik-alt/auth-service/proto";
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (AuthResponse);
+
+  rpc Login(LoginRequest) returns (AuthResponse);
+
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);
+}
+
+// ============================================
+// РЕГИСТРАЦИЯ
+// ============================================
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string username = 3;
+}
+
+// ============================================
+// ВХОД
+// ============================================
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// ============================================
+// ОБЩИЙ ОТВЕТ С ТОКЕНАМИ
+// ============================================
+
+// Используется для Register, Login, RefreshToken
+message AuthResponse {
+  bool success = 1;
+  string message = 2;
+
+  // Данные пользователя (только при успехе)
+  User user = 3;
+
+  // Токены
+  string access_token = 4;
+  string refresh_token = 5;
+  int64 expires_in = 6;  // Время жизни access токена в секундах
+}
+
+// Информация о пользователе
+message User {
+  string user_id = 1;
+  string email = 2;
+  string username = 3;
+  int64 created_at = 4;
+}
+
+// ============================================
+// ВАЛИДАЦИЯ ТОКЕНА
+// ============================================
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+  string email = 3;
+}
+
+// ============================================
+// ОБНОВЛЕНИЕ ТОКЕНА
+// ============================================
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+// RefreshToken возвращает AuthResponse (новые токены)
