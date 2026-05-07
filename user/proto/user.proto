@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/radik-alt/auth_service/user/proto";
+
+service UserService {
+  // Создание пользователя (регистрация)
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+
+  // Получить пользователя по ID
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+
+  // Обновить пользователя
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+
+  // Удалить пользователя
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
+
+// ============================================
+// CREATE USER (REGISTER)
+// ============================================
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+  string username = 3;
+  string phone = 4;
+}
+
+message CreateUserResponse {
+  // Данные созданного пользователя
+  User user = 3;
+
+  // Токены (от Auth Service)
+  string access_token = 4;
+  string refresh_token = 5;
+  int64 expires_in = 6;
+  string token_type = 7;
+}
+
+// ============================================
+// GET USER BY ID
+// ============================================
+
+message GetUserByIdRequest {
+  string user_id = 1;
+}
+
+message GetUserByIdResponse {
+  User user = 3;
+}
+
+// ============================================
+// UPDATE USER
+// ============================================
+
+message UpdateUserRequest {
+  string user_id = 1;
+
+  // Опциональные поля (обновляем только то, что передано)
+  optional string username = 2;
+  optional string phone = 3;
+  optional string email = 4;
+  optional string avatar_url = 5;
+  optional string bio = 6;
+}
+
+message UpdateUserResponse {
+  User user = 3;
+}
+
+// ============================================
+// DELETE USER
+// ============================================
+
+message DeleteUserRequest {
+  string user_id = 1;
+  string password = 2;  // Для подтверждения
+}
+
+message DeleteUserResponse {}
+
+// ============================================
+// USER MODEL
+// ============================================
+
+message User {
+  string user_id = 1;
+  string email = 2;
+  string username = 3;
+  string phone = 4;
+  string avatar_url = 5;
+  string bio = 6;
+  int64 created_at = 7;   // Unix timestamp
+  int64 updated_at = 8;   // Unix timestamp
+}
