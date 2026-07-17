@@ -10,7 +10,6 @@ import (
 
 type AppConfig struct {
 	GRPCAddr   string
-	HTTPAddr   string
 	DB         string
 	RedisAddr  string
 	JWTSecret  string
@@ -32,7 +31,6 @@ func Load(path string) (*AppConfig, error) {
 
 	cfg := &AppConfig{
 		GRPCAddr:   envOr("GRPC_ADDR", ":50051"),
-		HTTPAddr:   envOr("HTTP_ADDR", ":8080"),
 		DB:         os.Getenv("DATABASE_URL"),
 		RedisAddr:  envOr("REDIS_ADDR", "localhost:6379"),
 		JWTSecret:  os.Getenv("JWT_SECRET"),
