@@ -10,6 +10,7 @@ import (
 	pb "github.com/radik-alt/auth_service/auth/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 	"net/http"
@@ -29,6 +30,10 @@ func main() {
 	}
 	defer dbPool.Close()
 
+	if err := pgrepo.Migrate(ctx, dbPool); err != nil {
+		log.Fatalf("migrate: %v", err)
+	}
+
 	//redisClient, err := redisrepo.NewClient(cfg.RedisAddr)
 	//if err != nil {
 	//	log.Fatalf("redis: %v", err)
@@ -41,6 +46,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, authHandler)
+	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {

@@ -7,15 +7,10 @@ import (
 
 func MapAuthTokensToProto(tokens *model.TokenPair, success bool, message string) *pb.AuthResponse {
 	if tokens == nil {
-		return &pb.AuthResponse{
-			Success: success,
-			Message: message,
-		}
+		return &pb.AuthResponse{}
 	}
 
 	return &pb.AuthResponse{
-		Success:      success,
-		Message:      message,
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 		ExpiresIn:    tokens.ExpiresIn,
@@ -33,8 +28,5 @@ func MapLogoutResponse(
 	isSuccess bool,
 	message string,
 ) *pb.LogoutResponse {
-	return &pb.LogoutResponse{
-		Success: isSuccess,
-		Message: message,
-	}
+	return &pb.LogoutResponse{}
 }
