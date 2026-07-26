@@ -8,7 +8,6 @@ import (
 	"github.com/radik-alt/auth_service/auth/internal/service/auth"
 	pb "github.com/radik-alt/auth_service/auth/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
