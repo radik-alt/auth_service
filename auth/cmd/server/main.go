@@ -2,18 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/radik-alt/auth_service/auth/internal/config"
 	"github.com/radik-alt/auth_service/auth/internal/handler"
 	pgrepo "github.com/radik-alt/auth_service/auth/internal/repository/postgres"
 	"github.com/radik-alt/auth_service/auth/internal/service/auth"
 	pb "github.com/radik-alt/auth_service/auth/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
-	"net/http"
 )
 
 func main() {
@@ -53,21 +50,8 @@ func main() {
 		log.Fatalf("listen grpc: %v", err)
 	}
 
-	go func() {
-		log.Printf("gRPC server started on %s", cfg.GRPCAddr)
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("grpc serve: %v", err)
-		}
-	}()
-
-	mux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	if err := pb.RegisterAuthServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCAddr, opts); err != nil {
-		log.Fatalf("register gateway: %v", err)
-	}
-
-	log.Printf("HTTP gateway started on %s", cfg.HTTPAddr)
-	if err := http.ListenAndServe(cfg.HTTPAddr, mux); err != nil {
-		log.Fatalf("http serve: %v", err)
+	log.Printf("gRPC server started on %s", cfg.GRPCAddr)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("grpc serve: %v", err)
 	}
 }
