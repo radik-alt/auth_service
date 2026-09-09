@@ -53,6 +53,6 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 	return &model.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
-		ExpiresIn:    int64(s.accessTTL.Seconds()),
+		ExpiresIn:    uint64(s.accessTTL.Seconds()),
 	}, nil
 }

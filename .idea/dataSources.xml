@@ -13,7 +13,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="0@localhost" uuid="d2496431-a1ad-489b-aefc-4b0d54c10160">
+    <data-source source="LOCAL" name="auth-redis@localhost" uuid="d2496431-a1ad-489b-aefc-4b0d54c10160">
       <driver-ref>redis</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>jdbc.RedisDriver</jdbc-driver>

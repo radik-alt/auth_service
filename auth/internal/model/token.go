@@ -6,13 +6,13 @@ import "time"
 type TokenPair struct {
 	AccessToken  string
 	RefreshToken string
-	ExpiresIn    int64 // секунды до истечения access-токена
+	ExpiresIn    uint64 // секунды до истечения access-токена
 }
 
 // RefreshToken — DB-модель хранения refresh-токенов
 type RefreshToken struct {
 	ID        string
-	UserID    string
+	UserID    uint64
 	TokenHash string // SHA-256 от сырого токена
 	ExpiresAt time.Time
 	CreatedAt time.Time

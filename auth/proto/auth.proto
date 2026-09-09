@@ -31,13 +31,13 @@ service AuthService {
 }
 
 message LogInRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
 }
 
 message AuthResponse {
   string access_token = 1;
   string refresh_token = 2;
-  int64 expires_in = 3;
+  uint64 expires_in = 3;
   string token_type = 4;
 }
 
@@ -47,6 +47,7 @@ message RefreshTokenRequest {
 
 message LogoutRequest {
   string access_token = 1;
+  string refresh_token = 2;
 }
 
 message LogoutResponse {}

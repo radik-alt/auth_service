@@ -1,6 +1,8 @@
-.PHONY: deps proto swagger clean help
+.PHONY: deps proto swagger clean clean-all help redis-up redis-down redis-rm redis-cli redis-logs
 
 PROTO_DEPS=proto_deps
+REDIS_CONTAINER=auth-redis
+REDIS_PORT=6379
 
 # Скачивание зависимостей
 deps:
@@ -56,6 +58,38 @@ clean-all: clean
 	rm -rf $(PROTO_DEPS)
 	@echo "✅ All cleaned!"
 
+# Поднять Redis (создаёт контейнер, если его ещё нет, иначе просто стартует)
+redis-up:
+	@if [ -n "$$(docker ps -q -f name=^/$(REDIS_CONTAINER)$$)" ]; then \
+		echo "✅ Redis already running"; \
+	elif [ -n "$$(docker ps -aq -f name=^/$(REDIS_CONTAINER)$$)" ]; then \
+		echo "🔄 Starting existing Redis container..."; \
+		docker start $(REDIS_CONTAINER); \
+	else \
+		echo "🚀 Creating Redis container..."; \
+		docker run -d --name $(REDIS_CONTAINER) \
+			-p $(REDIS_PORT):6379 \
+			-v $(REDIS_CONTAINER)-data:/data \
+			redis:7-alpine redis-server --appendonly yes; \
+	fi
+	@echo "✅ Redis on localhost:$(REDIS_PORT)"
+
+# Остановить Redis (данные сохраняются)
+redis-down:
+	@docker stop $(REDIS_CONTAINER) 2>/dev/null || true
+
+# Остановить и удалить контейнер Redis (volume с данными остаётся)
+redis-rm: redis-down
+	@docker rm $(REDIS_CONTAINER) 2>/dev/null || true
+
+# Открыть redis-cli внутри контейнера
+redis-cli:
+	@docker exec -it $(REDIS_CONTAINER) redis-cli
+
+# Логи Redis
+redis-logs:
+	@docker logs -f $(REDIS_CONTAINER)
+
 # Помощь
 help:
 	@echo "Commands:"
@@ -64,3 +98,8 @@ help:
 	@echo "  make swagger    - Generate only Swagger"
 	@echo "  make clean      - Remove generated files"
 	@echo "  make clean-all  - Remove everything including deps"
+	@echo "  make redis-up   - Start Redis container (creates it on first run)"
+	@echo "  make redis-down - Stop Redis container"
+	@echo "  make redis-rm   - Stop and remove Redis container"
+	@echo "  make redis-cli  - Open redis-cli in the running container"
+	@echo "  make redis-logs - Tail Redis container logs"

@@ -11,7 +11,7 @@ func (handler *authHandler) Logout(
 	req *proto.LogoutRequest,
 ) (*proto.LogoutResponse, error) {
 
-	err := handler.service.Logout(ctx, req.AccessToken)
+	err := handler.service.Logout(ctx, req.AccessToken, req.RefreshToken)
 	if err != nil {
 		return nil, err
 	}

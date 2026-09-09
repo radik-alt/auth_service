@@ -125,7 +125,7 @@
         },
         "expiresIn": {
           "type": "string",
-          "format": "int64"
+          "format": "uint64"
         },
         "tokenType": {
           "type": "string"
@@ -136,7 +136,8 @@
       "type": "object",
       "properties": {
         "userId": {
-          "type": "string"
+          "type": "string",
+          "format": "uint64"
         }
       }
     },
@@ -144,6 +145,9 @@
       "type": "object",
       "properties": {
         "accessToken": {
+          "type": "string"
+        },
+        "refreshToken": {
           "type": "string"
         }
       }

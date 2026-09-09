@@ -9,7 +9,7 @@ import (
 	"github.com/radik-alt/auth_service/auth/internal/model"
 )
 
-func (s *authService) LogIn(ctx context.Context, userID string) (*model.TokenPair, error) {
+func (s *authService) LogIn(ctx context.Context, userID uint64) (*model.TokenPair, error) {
 	accessToken, _, _, err := s.generateAccessToken(userID)
 	if err != nil {
 		return nil, err
@@ -33,6 +33,6 @@ func (s *authService) LogIn(ctx context.Context, userID string) (*model.TokenPai
 	return &model.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    int64(s.accessTTL.Seconds()),
+		ExpiresIn:    uint64(s.accessTTL.Seconds()),
 	}, nil
 }
