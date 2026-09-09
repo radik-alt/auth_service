@@ -2,15 +2,37 @@ package auth
 
 import (
 	"context"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/radik-alt/auth_service/auth/internal/model"
 )
 
-func (s *authService) Logout(ctx context.Context, refreshToken string) error {
-	err := s.repo.DeleteByTokenHash(ctx, hashToken(refreshToken))
+func (s *authService) LogIn(ctx context.Context, userID string) (*model.TokenPair, error) {
+	accessToken, _, _, err := s.generateAccessToken(userID)
 	if err != nil {
-		return status.Error(codes.NotFound, "refresh token not found")
+		return nil, err
 	}
 
-	return nil
+	refreshToken := newRefreshTokenValue()
+	now := time.Now()
+	expiresAt := now.Add(s.refreshTTL)
+
+	err = s.refreshRepo.SaveByTokenHash(ctx, &model.RefreshToken{
+		ID:        uuid.NewString(),
+		UserID:    userID,
+		TokenHash: hashToken(refreshToken),
+		ExpiresAt: expiresAt,
+		CreatedAt: now,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("save refresh token: %w", err)
+	}
+
+	return &model.TokenPair{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresIn:    int64(s.accessTTL.Seconds()),
+	}, nil
 }

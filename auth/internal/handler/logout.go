@@ -2,10 +2,8 @@ package handler
 
 import (
 	"context"
-	"github.com/radik-alt/auth_service/auth/internal/handler/convertor"
+
 	"github.com/radik-alt/auth_service/auth/proto"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (handler *authHandler) Logout(
@@ -13,10 +11,10 @@ func (handler *authHandler) Logout(
 	req *proto.LogoutRequest,
 ) (*proto.LogoutResponse, error) {
 
-	err := handler.service.Logout(ctx, req.GetRefreshToken())
+	err := handler.service.Logout(ctx, req.AccessToken)
 	if err != nil {
-		return convertor.MapLogoutResponse(false, "error logout"), status.Error(codes.Unimplemented, "method RefreshToken not implemented")
+		return nil, err
 	}
 
-	return convertor.MapLogoutResponse(true, "success"), nil
+	return &proto.LogoutResponse{}, nil
 }

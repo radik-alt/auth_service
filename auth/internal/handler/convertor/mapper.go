@@ -5,7 +5,7 @@ import (
 	pb "github.com/radik-alt/auth_service/auth/proto"
 )
 
-func MapAuthTokensToProto(tokens *model.TokenPair, success bool, message string) *pb.AuthResponse {
+func MapAuthTokensToProto(tokens *model.TokenPair) *pb.AuthResponse {
 	if tokens == nil {
 		return &pb.AuthResponse{}
 	}
@@ -16,17 +16,4 @@ func MapAuthTokensToProto(tokens *model.TokenPair, success bool, message string)
 		ExpiresIn:    tokens.ExpiresIn,
 		TokenType:    "Bearer",
 	}
-}
-
-func MapValidateToken(isValid bool) *pb.ValidateTokenResponse {
-	return &pb.ValidateTokenResponse{
-		Valid: isValid,
-	}
-}
-
-func MapLogoutResponse(
-	isSuccess bool,
-	message string,
-) *pb.LogoutResponse {
-	return &pb.LogoutResponse{}
 }

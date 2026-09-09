@@ -4,47 +4,55 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/radik-alt/auth_service/auth/internal/model"
 	"github.com/radik-alt/auth_service/auth/internal/repository"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*model.TokenPair, error) {
 	tokenHash := hashToken(refreshToken)
 
-	stored, err := s.repo.GetByTokenHash(ctx, tokenHash)
-	if errors.Is(err, repository.ErrNotFound) {
-		return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
-	}
+	stored, err := s.refreshRepo.GetByTokenHash(ctx, tokenHash)
 	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, ErrInvalidToken
+		}
 		return nil, fmt.Errorf("get refresh token: %w", err)
 	}
 
-	// Токен одноразовый: удаляем его при любой попытке использования,
-	// даже если он оказался просроченным, чтобы его нельзя было переиспользовать.
-	if err := s.repo.DeleteByTokenHash(ctx, tokenHash); err != nil {
-		return nil, fmt.Errorf("delete refresh token: %w", err)
-	}
-
 	if stored.IsExpired() {
-		return nil, status.Error(codes.Unauthenticated, "refresh token expired")
+		_ = s.refreshRepo.DeleteByTokenHash(ctx, tokenHash)
+		return nil, ErrInvalidToken
 	}
 
-	accessToken, err := s.issueAccessToken(stored.UserID, "")
+	if err := s.refreshRepo.DeleteByTokenHash(ctx, tokenHash); err != nil {
+		return nil, fmt.Errorf("delete old refresh token: %w", err)
+	}
+
+	accessToken, _, _, err := s.generateAccessToken(stored.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	rawRefresh, err := s.issueRefreshToken(ctx, stored.UserID)
-	if err != nil {
-		return nil, err
+	newRefreshToken := newRefreshTokenValue()
+	now := time.Now()
+	expiresAt := now.Add(s.refreshTTL)
+
+	if err := s.refreshRepo.SaveByTokenHash(ctx, &model.RefreshToken{
+		ID:        uuid.NewString(),
+		UserID:    stored.UserID,
+		TokenHash: hashToken(newRefreshToken),
+		ExpiresAt: expiresAt,
+		CreatedAt: now,
+	}); err != nil {
+		return nil, fmt.Errorf("save refresh token: %w", err)
 	}
 
 	return &model.TokenPair{
 		AccessToken:  accessToken,
-		RefreshToken: rawRefresh,
+		RefreshToken: newRefreshToken,
 		ExpiresIn:    int64(s.accessTTL.Seconds()),
 	}, nil
 }

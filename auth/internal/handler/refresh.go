@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+
 	"github.com/radik-alt/auth_service/auth/internal/handler/convertor"
 	"github.com/radik-alt/auth_service/auth/proto"
 )
@@ -16,5 +17,5 @@ func (handler *authHandler) RefreshToken(
 		return nil, err
 	}
 
-	return convertor.MapAuthTokensToProto(token, true, ""), nil
+	return convertor.MapAuthTokensToProto(token), nil
 }

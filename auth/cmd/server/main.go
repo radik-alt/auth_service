@@ -2,44 +2,37 @@ package main
 
 import (
 	"context"
+	"log"
+	"net"
+
 	"github.com/radik-alt/auth_service/auth/internal/config"
 	"github.com/radik-alt/auth_service/auth/internal/handler"
-	pgrepo "github.com/radik-alt/auth_service/auth/internal/repository/postgres"
+	redisrepo "github.com/radik-alt/auth_service/auth/internal/repository/redis"
 	"github.com/radik-alt/auth_service/auth/internal/service/auth"
 	pb "github.com/radik-alt/auth_service/auth/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
 )
 
 func main() {
+	ctx := context.Background()
+
 	cfg, err := config.Load(".env")
 	if err != nil {
 		log.Fatalf("config: %v", err)
 	}
 
-	ctx := context.Background()
-
-	dbPool, err := pgrepo.NewPool(ctx, cfg.DB)
+	redisClient, err := redisrepo.NewClient(ctx, cfg.RedisAddr)
 	if err != nil {
-		log.Fatalf("postgres: %v", err)
+		log.Fatalf("redis: %v", err)
 	}
-	defer dbPool.Close()
+	defer redisClient.Close()
 
-	if err := pgrepo.Migrate(ctx, dbPool); err != nil {
-		log.Fatalf("migrate: %v", err)
-	}
+	refreshRepo := redisrepo.NewRefreshTokenRepo(redisClient)
+	blacklist := redisrepo.NewBlacklistRepo(redisClient)
 
-	//redisClient, err := redisrepo.NewClient(cfg.RedisAddr)
-	//if err != nil {
-	//	log.Fatalf("redis: %v", err)
-	//}
-	//defer redisClient.Close()
-
-	authRepository := pgrepo.NewRefreshTokenRepo(dbPool)
-	service := auth.NewAuthService(authRepository, cfg)
-	authHandler := handler.NewAuthHandler(service)
+	authService := auth.NewAuthService(refreshRepo, blacklist, cfg)
+	authHandler := handler.NewAuthHandler(authService)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, authHandler)
