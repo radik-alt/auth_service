@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	authpb "github.com/radik-alt/auth_service/auth/proto"
+	authpb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 	"github.com/radik-alt/auth_service/gateway/internal/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

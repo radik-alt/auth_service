@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/radik-alt/auth_service/auth/internal/config"
-	pb "github.com/radik-alt/auth_service/auth/proto"
+	pb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

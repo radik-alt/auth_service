@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/radik-alt/auth_service/auth/internal/service"
-	pb "github.com/radik-alt/auth_service/auth/proto"
+	pb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 )
 
 type authHandler struct {

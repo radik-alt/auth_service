@@ -9,7 +9,7 @@ import (
 	redisrepo "github.com/radik-alt/auth_service/auth/internal/repository/redis"
 	"github.com/radik-alt/auth_service/auth/internal/service"
 	"github.com/radik-alt/auth_service/auth/internal/service/auth"
-	pb "github.com/radik-alt/auth_service/auth/proto"
+	pb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 	"github.com/redis/go-redis/v9"
 )
 

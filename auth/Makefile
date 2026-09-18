@@ -3,6 +3,8 @@
 PROTO_DEPS=proto_deps
 REDIS_CONTAINER=auth-redis
 REDIS_PORT=6379
+PROTO_DIR=pkg/auth/v1
+GRPC_PROTO=$(PROTO_DIR)/auth.proto
 
 # Скачивание зависимостей
 deps:
@@ -30,7 +32,7 @@ proto: deps
 		--grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
 		--openapiv2_out=docs \
 		--openapiv2_opt=allow_merge=true,merge_file_name=auth \
-		proto/auth.proto
+		$(GRPC_PROTO)
 	@echo "✅ Done!"
 	@echo "📚 Swagger: docs/auth.swagger.json"
 
@@ -41,14 +43,14 @@ swagger: deps
 	protoc -I . -I $(PROTO_DEPS) \
 		--openapiv2_out=docs \
 		--openapiv2_opt=allow_merge=true,merge_file_name=auth \
-		proto/auth.proto
+		$(GRPC_PROTO)
 	@echo "✅ Swagger: docs/auth.swagger.json"
 
 # Очистка
 clean:
 	@echo "🧹 Cleaning..."
-	rm -f proto/*.pb.go
-	rm -f proto/*.pb.gw.go
+	rm -f $(PROTO_DIR)/*.pb.go
+	rm -f $(PROTO_DIR)/*.pb.gw.go
 	rm -f docs/*.swagger.json
 	@echo "✅ Cleaned!"
 

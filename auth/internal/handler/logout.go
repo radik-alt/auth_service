@@ -3,18 +3,18 @@ package handler
 import (
 	"context"
 
-	"github.com/radik-alt/auth_service/auth/proto"
+	pb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 )
 
 func (handler *authHandler) Logout(
 	ctx context.Context,
-	req *proto.LogoutRequest,
-) (*proto.LogoutResponse, error) {
+	req *pb.LogoutRequest,
+) (*pb.LogoutResponse, error) {
 
 	err := handler.service.Logout(ctx, req.AccessToken, req.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return &proto.LogoutResponse{}, nil
+	return &pb.LogoutResponse{}, nil
 }

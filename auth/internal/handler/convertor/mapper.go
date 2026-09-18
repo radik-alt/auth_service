@@ -2,7 +2,7 @@ package convertor
 
 import (
 	"github.com/radik-alt/auth_service/auth/internal/model"
-	pb "github.com/radik-alt/auth_service/auth/proto"
+	pb "github.com/radik-alt/auth_service/auth/pkg/auth/v1"
 )
 
 func MapAuthTokensToProto(tokens *model.TokenPair) *pb.AuthResponse {
