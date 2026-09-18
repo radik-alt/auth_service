@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type AppConfig struct {
+type Config struct {
 	GRPCAddr   string
 	RedisAddr  string
 	JWTSecret  string
@@ -16,40 +16,40 @@ type AppConfig struct {
 	RefreshTTL time.Duration
 }
 
-// Option — функция, модифицирующая уже собранный AppConfig
-type Option func(*AppConfig)
+// Option — функция, модифицирующая уже собранный Config
+type Option func(*Config)
 
 func WithGRPCAddr(addr string) Option {
-	return func(c *AppConfig) {
+	return func(c *Config) {
 		c.GRPCAddr = addr
 	}
 }
 
 func WithRedisAddr(addr string) Option {
-	return func(c *AppConfig) {
+	return func(c *Config) {
 		c.RedisAddr = addr
 	}
 }
 
 func WithJWTSecret(secret string) Option {
-	return func(c *AppConfig) {
+	return func(c *Config) {
 		c.JWTSecret = secret
 	}
 }
 
 func WithAccessTTL(d time.Duration) Option {
-	return func(c *AppConfig) {
+	return func(c *Config) {
 		c.AccessTTL = d
 	}
 }
 
 func WithRefreshTTL(d time.Duration) Option {
-	return func(c *AppConfig) {
+	return func(c *Config) {
 		c.RefreshTTL = d
 	}
 }
 
-func Load(path string, opts ...Option) (*AppConfig, error) {
+func Load(path string, opts ...Option) (*Config, error) {
 	_ = godotenv.Load(path)
 
 	accessTTL, err := parseDuration("ACCESS_TOKEN_TTL", "15m")
@@ -62,7 +62,7 @@ func Load(path string, opts ...Option) (*AppConfig, error) {
 		return nil, fmt.Errorf("REFRESH_TOKEN_TTL: %w", err)
 	}
 
-	cfg := &AppConfig{
+	cfg := &Config{
 		GRPCAddr:   envOr("GRPC_ADDR", ":50051"),
 		RedisAddr:  envOr("REDIS_ADDR", "localhost:6379"),
 		JWTSecret:  os.Getenv("JWT_SECRET"),

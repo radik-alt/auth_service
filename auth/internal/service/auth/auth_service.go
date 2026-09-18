@@ -19,7 +19,7 @@ type authService struct {
 func NewAuthService(
 	refreshRepo repository.TokenRepository,
 	blacklist repository.TokenBlacklist,
-	cfg *config.AppConfig,
+	cfg *config.Config,
 ) service.AuthService {
 	return &authService{
 		refreshRepo: refreshRepo,
