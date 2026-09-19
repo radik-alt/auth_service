@@ -25,33 +25,31 @@ deps:
 # Генерация proto + Swagger
 proto: deps
 	@echo "🔧 Generating proto and Swagger..."
-	@mkdir -p docs
 	protoc -I . -I $(PROTO_DEPS) \
 		--go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		--grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
-		--openapiv2_out=docs \
+		--openapiv2_out=$(PROTO_DIR) \
 		--openapiv2_opt=allow_merge=true,merge_file_name=auth \
 		$(GRPC_PROTO)
 	@echo "✅ Done!"
-	@echo "📚 Swagger: docs/auth.swagger.json"
+	@echo "📚 Swagger: $(PROTO_DIR)/auth.swagger.json"
 
 # Только Swagger
 swagger: deps
 	@echo "📚 Generating only Swagger..."
-	@mkdir -p docs
 	protoc -I . -I $(PROTO_DEPS) \
-		--openapiv2_out=docs \
+		--openapiv2_out=$(PROTO_DIR) \
 		--openapiv2_opt=allow_merge=true,merge_file_name=auth \
 		$(GRPC_PROTO)
-	@echo "✅ Swagger: docs/auth.swagger.json"
+	@echo "✅ Swagger: $(PROTO_DIR)/auth.swagger.json"
 
 # Очистка
 clean:
 	@echo "🧹 Cleaning..."
 	rm -f $(PROTO_DIR)/*.pb.go
 	rm -f $(PROTO_DIR)/*.pb.gw.go
-	rm -f docs/*.swagger.json
+	rm -f $(PROTO_DIR)/*.swagger.json
 	@echo "✅ Cleaned!"
 
 # Очистка всего (включая зависимости)
