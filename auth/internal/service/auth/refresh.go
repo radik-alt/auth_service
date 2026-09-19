@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,42 +13,44 @@ import (
 )
 
 func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*model.TokenPair, error) {
-	tokenHash := hashToken(refreshToken)
-
-	stored, err := s.refreshRepo.GetByTokenHash(ctx, tokenHash)
+	stored, err := s.refreshRepo.ConsumeByTokenHash(ctx, hashToken(refreshToken))
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
 			return nil, ErrInvalidToken
 		}
-		return nil, fmt.Errorf("get refresh token: %w", err)
+		return nil, fmt.Errorf("consume refresh token: %w", err)
 	}
 
 	if stored.IsExpired() {
-		_ = s.refreshRepo.DeleteByTokenHash(ctx, tokenHash)
 		return nil, ErrInvalidToken
 	}
 
-	if err := s.refreshRepo.DeleteByTokenHash(ctx, tokenHash); err != nil {
-		return nil, fmt.Errorf("delete old refresh token: %w", err)
-	}
-
-	accessToken, _, _, err := s.generateAccessToken(stored.UserID)
+	accessToken, jti, accessExpiresAt, err := s.generateAccessToken(stored.UserID)
 	if err != nil {
+		s.restore(ctx, stored)
 		return nil, err
 	}
 
 	newRefreshToken := newRefreshTokenValue()
 	now := time.Now()
-	expiresAt := now.Add(s.refreshTTL)
 
 	if err := s.refreshRepo.SaveByTokenHash(ctx, &model.RefreshToken{
 		ID:        uuid.NewString(),
 		UserID:    stored.UserID,
 		TokenHash: hashToken(newRefreshToken),
-		ExpiresAt: expiresAt,
+		ExpiresAt: now.Add(s.refreshTTL),
 		CreatedAt: now,
+
+		AccessJTI:       jti,
+		AccessExpiresAt: accessExpiresAt,
 	}); err != nil {
+		s.restore(ctx, stored)
 		return nil, fmt.Errorf("save refresh token: %w", err)
+	}
+
+	// старый access больше не нужен; сбой отзыва не должен ломать уже выданную пару
+	if err := s.revoke(ctx, stored.AccessJTI, stored.AccessExpiresAt); err != nil {
+		log.Printf("revoke previous access token: %v", err)
 	}
 
 	return &model.TokenPair{
@@ -55,4 +58,11 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 		RefreshToken: newRefreshToken,
 		ExpiresIn:    uint64(s.accessTTL.Seconds()),
 	}, nil
+}
+
+// restore возвращает погашенный refresh-токен, чтобы клиент мог повторить запрос, а не потерял сессию.
+func (s *authService) restore(ctx context.Context, stored *model.RefreshToken) {
+	if err := s.refreshRepo.SaveByTokenHash(ctx, stored); err != nil {
+		log.Printf("restore refresh token: %v", err)
+	}
 }

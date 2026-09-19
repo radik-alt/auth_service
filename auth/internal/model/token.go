@@ -16,6 +16,10 @@ type RefreshToken struct {
 	TokenHash string // SHA-256 от сырого токена
 	ExpiresAt time.Time
 	CreatedAt time.Time
+
+	// парный access-токен: нужен, чтобы отозвать его при refresh и LogoutAll
+	AccessJTI       string
+	AccessExpiresAt time.Time
 }
 
 func (t *RefreshToken) IsExpired() bool {

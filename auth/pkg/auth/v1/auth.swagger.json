@@ -80,6 +80,38 @@
         ]
       }
     },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "operationId": "AuthService_LogoutAll",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/authLogoutAllResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/authLogoutAllRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AuthService"
+        ]
+      }
+    },
     "/api/v1/auth/refresh": {
       "post": {
         "operationId": "AuthService_RefreshToken",
@@ -140,6 +172,17 @@
           "format": "uint64"
         }
       }
+    },
+    "authLogoutAllRequest": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string"
+        }
+      }
+    },
+    "authLogoutAllResponse": {
+      "type": "object"
     },
     "authLogoutRequest": {
       "type": "object",

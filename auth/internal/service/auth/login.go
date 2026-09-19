@@ -10,9 +10,18 @@ import (
 )
 
 func (s *authService) LogIn(ctx context.Context, userID uint64) (*model.TokenPair, error) {
-	accessToken, _, _, err := s.generateAccessToken(userID)
+	accessToken, jti, accessExpiresAt, err := s.generateAccessToken(userID)
 	if err != nil {
 		return nil, err
+	}
+
+	isBlack, err := s.blacklist.IsBlacklisted(ctx, jti)
+	if err != nil {
+		return nil, err
+	}
+
+	if isBlack {
+		return nil, ErrTokenExpired
 	}
 
 	refreshToken := newRefreshTokenValue()
@@ -20,11 +29,13 @@ func (s *authService) LogIn(ctx context.Context, userID uint64) (*model.TokenPai
 	expiresAt := now.Add(s.refreshTTL)
 
 	err = s.refreshRepo.SaveByTokenHash(ctx, &model.RefreshToken{
-		ID:        uuid.NewString(),
-		UserID:    userID,
-		TokenHash: hashToken(refreshToken),
-		ExpiresAt: expiresAt,
-		CreatedAt: now,
+		ID:              uuid.NewString(),
+		UserID:          userID,
+		TokenHash:       hashToken(refreshToken),
+		ExpiresAt:       expiresAt,
+		CreatedAt:       now,
+		AccessJTI:       jti,
+		AccessExpiresAt: accessExpiresAt,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("save refresh token: %w", err)
