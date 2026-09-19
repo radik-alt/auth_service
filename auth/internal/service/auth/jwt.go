@@ -1,17 +1,14 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/radik-alt/auth_service/auth/internal/service"
 )
-
-var ErrInvalidToken = errors.New("invalid or expired token")
-var ErrTokenExpired = errors.New("token is expired")
 
 type accessClaims struct {
 	UserID uint64 `json:"user_id"`
@@ -40,13 +37,6 @@ func (s *authService) generateAccessToken(userID uint64) (token string, jti stri
 	return signed, jti, expiresAt, nil
 }
 
-func (s *authService) keyFunc(t *jwt.Token) (interface{}, error) {
-	if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-		return nil, ErrInvalidToken
-	}
-	return s.jwtSecret, nil
-}
-
 func (s *authService) parseAccessToken(tokenStr string) (*accessClaims, error) {
 	return s.parse(tokenStr)
 }
@@ -59,9 +49,19 @@ func (s *authService) parseAccessTokenIgnoringExpiry(tokenStr string) (*accessCl
 
 func (s *authService) parse(tokenStr string, opts ...jwt.ParserOption) (*accessClaims, error) {
 	claims := &accessClaims{}
-	token, err := jwt.ParseWithClaims(tokenStr, claims, s.keyFunc, opts...)
+	token, err := jwt.ParseWithClaims(
+		tokenStr,
+		claims,
+		func(t *jwt.Token) (any, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, service.ErrInvalidToken
+			}
+			return s.jwtSecret, nil
+		},
+		opts...,
+	)
 	if err != nil || !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, service.ErrInvalidToken
 	}
 	return claims, nil
 }

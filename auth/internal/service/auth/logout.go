@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/radik-alt/auth_service/auth/internal/repository"
+	"github.com/radik-alt/auth_service/auth/internal/service"
 )
 
 func (s *authService) Logout(ctx context.Context, accessToken, refreshToken string) error {
 	claims, err := s.parseAccessTokenIgnoringExpiry(accessToken)
 	if err != nil {
-		return ErrInvalidToken
+		return service.ErrInvalidToken
 	}
 
 	if refreshToken != "" {
@@ -22,7 +23,7 @@ func (s *authService) Logout(ctx context.Context, accessToken, refreshToken stri
 		case err == nil:
 			// refresh чужого пользователя: ничего не удаляем
 			if stored.UserID != claims.UserID {
-				return ErrInvalidToken
+				return service.ErrInvalidToken
 			}
 			if err := s.refreshRepo.DeleteByTokenHash(ctx, hash); err != nil {
 				return err

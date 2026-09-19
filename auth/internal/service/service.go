@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/radik-alt/auth_service/auth/internal/model"
 )
+
+var ErrInvalidToken = errors.New("invalid or expired token")
 
 type AuthService interface {
 	LogIn(ctx context.Context, userID uint64) (*model.TokenPair, error)
