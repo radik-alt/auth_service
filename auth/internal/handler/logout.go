@@ -10,10 +10,12 @@ func (handler *authHandler) Logout(
 	ctx context.Context,
 	req *pb.LogoutRequest,
 ) (*pb.LogoutResponse, error) {
+	if req.AccessToken == "" {
+		return nil, requiredField("access_token")
+	}
 
-	err := handler.service.Logout(ctx, req.AccessToken, req.RefreshToken)
-	if err != nil {
-		return nil, err
+	if err := handler.service.Logout(ctx, req.AccessToken, req.RefreshToken); err != nil {
+		return nil, toStatusError(err)
 	}
 
 	return &pb.LogoutResponse{}, nil

@@ -1,12 +1,16 @@
 package auth
 
-import "context"
+import (
+	"context"
+
+	"github.com/radik-alt/auth_service/auth/internal/service"
+)
 
 // LogoutAll завершает все сессии пользователя access-токена (выход со всех устройств).
 func (s *authService) LogoutAll(ctx context.Context, accessToken string) error {
 	claims, err := s.parseAccessToken(accessToken)
 	if err != nil {
-		return ErrInvalidToken
+		return service.ErrInvalidToken
 	}
 
 	sessions, err := s.refreshRepo.DeleteAllByUser(ctx, claims.UserID)

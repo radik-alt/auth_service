@@ -8,6 +8,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// HS256 требует секрет не короче размера хэша (32 байта), иначе его можно подобрать офлайн по выданному токену.
+const minJWTSecretLen = 32
+
 type Config struct {
 	GRPCAddr   string
 	RedisAddr  string
@@ -74,8 +77,14 @@ func Load(path string, opts ...Option) (*Config, error) {
 		opt(cfg)
 	}
 
-	if cfg.JWTSecret == "" {
-		return nil, fmt.Errorf("JWT_SECRET is required")
+	if len(cfg.JWTSecret) < minJWTSecretLen {
+		return nil, fmt.Errorf("JWT_SECRET is required and must be at least %d bytes", minJWTSecretLen)
+	}
+	if cfg.AccessTTL <= 0 {
+		return nil, fmt.Errorf("ACCESS_TOKEN_TTL must be positive")
+	}
+	if cfg.RefreshTTL <= 0 {
+		return nil, fmt.Errorf("REFRESH_TOKEN_TTL must be positive")
 	}
 	if cfg.RedisAddr == "" {
 		return nil, fmt.Errorf("REDIS_ADDR is required")
