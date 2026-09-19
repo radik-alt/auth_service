@@ -266,6 +266,86 @@ func (*LogoutResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_auth_v1_auth_proto_rawDescGZIP(), []int{4}
 }
 
+type LogoutAllRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutAllRequest) Reset() {
+	*x = LogoutAllRequest{}
+	mi := &file_pkg_auth_v1_auth_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutAllRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutAllRequest) ProtoMessage() {}
+
+func (x *LogoutAllRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_auth_v1_auth_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutAllRequest.ProtoReflect.Descriptor instead.
+func (*LogoutAllRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_auth_v1_auth_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *LogoutAllRequest) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+type LogoutAllResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutAllResponse) Reset() {
+	*x = LogoutAllResponse{}
+	mi := &file_pkg_auth_v1_auth_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutAllResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutAllResponse) ProtoMessage() {}
+
+func (x *LogoutAllResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_auth_v1_auth_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutAllResponse.ProtoReflect.Descriptor instead.
+func (*LogoutAllResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_auth_v1_auth_proto_rawDescGZIP(), []int{6}
+}
+
 var File_pkg_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_pkg_auth_v1_auth_proto_rawDesc = "" +
@@ -285,11 +365,15 @@ const file_pkg_auth_v1_auth_proto_rawDesc = "" +
 	"\rLogoutRequest\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"\x10\n" +
-	"\x0eLogoutResponse2\x92\x02\n" +
+	"\x0eLogoutResponse\"5\n" +
+	"\x10LogoutAllRequest\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"\x13\n" +
+	"\x11LogoutAllResponse2\xf4\x02\n" +
 	"\vAuthService\x12N\n" +
 	"\x05LogIn\x12\x12.auth.LogInRequest\x1a\x12.auth.AuthResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12^\n" +
 	"\fRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x12.auth.AuthResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12S\n" +
-	"\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logoutB;Z9github.com/radik-alt/auth_service/auth/pkg/auth/v1;authv1b\x06proto3"
+	"\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12`\n" +
+	"\tLogoutAll\x12\x16.auth.LogoutAllRequest\x1a\x17.auth.LogoutAllResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/v1/auth/logout-allB;Z9github.com/radik-alt/auth_service/auth/pkg/auth/v1;authv1b\x06proto3"
 
 var (
 	file_pkg_auth_v1_auth_proto_rawDescOnce sync.Once
@@ -303,23 +387,27 @@ func file_pkg_auth_v1_auth_proto_rawDescGZIP() []byte {
 	return file_pkg_auth_v1_auth_proto_rawDescData
 }
 
-var file_pkg_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_pkg_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pkg_auth_v1_auth_proto_goTypes = []any{
 	(*LogInRequest)(nil),        // 0: auth.LogInRequest
 	(*AuthResponse)(nil),        // 1: auth.AuthResponse
 	(*RefreshTokenRequest)(nil), // 2: auth.RefreshTokenRequest
 	(*LogoutRequest)(nil),       // 3: auth.LogoutRequest
 	(*LogoutResponse)(nil),      // 4: auth.LogoutResponse
+	(*LogoutAllRequest)(nil),    // 5: auth.LogoutAllRequest
+	(*LogoutAllResponse)(nil),   // 6: auth.LogoutAllResponse
 }
 var file_pkg_auth_v1_auth_proto_depIdxs = []int32{
 	0, // 0: auth.AuthService.LogIn:input_type -> auth.LogInRequest
 	2, // 1: auth.AuthService.RefreshToken:input_type -> auth.RefreshTokenRequest
 	3, // 2: auth.AuthService.Logout:input_type -> auth.LogoutRequest
-	1, // 3: auth.AuthService.LogIn:output_type -> auth.AuthResponse
-	1, // 4: auth.AuthService.RefreshToken:output_type -> auth.AuthResponse
-	4, // 5: auth.AuthService.Logout:output_type -> auth.LogoutResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	5, // 3: auth.AuthService.LogoutAll:input_type -> auth.LogoutAllRequest
+	1, // 4: auth.AuthService.LogIn:output_type -> auth.AuthResponse
+	1, // 5: auth.AuthService.RefreshToken:output_type -> auth.AuthResponse
+	4, // 6: auth.AuthService.Logout:output_type -> auth.LogoutResponse
+	6, // 7: auth.AuthService.LogoutAll:output_type -> auth.LogoutAllResponse
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -336,7 +424,7 @@ func file_pkg_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_auth_v1_auth_proto_rawDesc), len(file_pkg_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

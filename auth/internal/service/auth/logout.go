@@ -9,22 +9,40 @@ import (
 )
 
 func (s *authService) Logout(ctx context.Context, accessToken, refreshToken string) error {
-	claims, err := s.parseAccessToken(accessToken)
+	claims, err := s.parseAccessTokenIgnoringExpiry(accessToken)
 	if err != nil {
 		return ErrInvalidToken
 	}
 
-	if ttl := time.Until(claims.ExpiresAt.Time); ttl > 0 {
-		if err := s.blacklist.Add(ctx, claims.ID, ttl); err != nil {
-			return err
-		}
-	}
-
 	if refreshToken != "" {
-		if err := s.refreshRepo.DeleteByTokenHash(ctx, hashToken(refreshToken)); err != nil && !errors.Is(err, repository.ErrNotFound) {
+		hash := hashToken(refreshToken)
+
+		stored, err := s.refreshRepo.GetByTokenHash(ctx, hash)
+		switch {
+		case err == nil:
+			// refresh чужого пользователя: ничего не удаляем
+			if stored.UserID != claims.UserID {
+				return ErrInvalidToken
+			}
+			if err := s.refreshRepo.DeleteByTokenHash(ctx, hash); err != nil {
+				return err
+			}
+		case !errors.Is(err, repository.ErrNotFound):
 			return err
 		}
 	}
 
-	return nil
+	if claims.ExpiresAt == nil {
+		return nil
+	}
+	return s.revoke(ctx, claims.ID, claims.ExpiresAt.Time)
+}
+
+// revoke кладёт access-токен в blacklist до его естественного истечения.
+func (s *authService) revoke(ctx context.Context, jti string, expiresAt time.Time) error {
+	ttl := time.Until(expiresAt)
+	if jti == "" || ttl <= 0 {
+		return nil
+	}
+	return s.blacklist.Add(ctx, jti, ttl)
 }
