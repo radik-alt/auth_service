@@ -57,25 +57,31 @@ services:
       timeout: 3s
       retries: 5
 
+  # одноразовый контейнер: применяет миграции и завершается
+  user-migrate:
+    profiles: ["wip"]
+    image: migrate/migrate:v4.18.3
+    volumes:
+      - ./user/migrations:/migrations:ro
+    command: ["-path", "/migrations", "-database", "postgres://user:user@postgres:5432/users?sslmode=disable", "up"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   user:
     profiles: ["wip"]
     build:
       context: .
       dockerfile: user/Dockerfile
-    env_file:
-      - path: user/.env # JWT_SECRET
-        required: false
     environment:
       GRPC_ADDR: ":50051"
       DATABASE_URL: "postgres://user:user@postgres:5432/users?sslmode=disable"
-      REDIS_ADDR: "redis:6380"
     ports:
       - "50052:50051"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      user-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
 
 volumes:
   redis-data:
