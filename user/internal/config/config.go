@@ -34,7 +34,7 @@ func Load(path string) (*AppConfig, error) {
 		GRPCAddr:   envOr("GRPC_ADDR", ":50051"),
 		HTTPAddr:   envOr("HTTP_ADDR", ":8080"),
 		DB:         os.Getenv("DATABASE_URL"),
-		RedisAddr:  envOr("REDIS_ADDR", "localhost:6379"),
+		RedisAddr:  envOr("REDIS_ADDR", "localhost:6380"),
 		JWTSecret:  os.Getenv("JWT_SECRET"),
 		AccessTTL:  accessTTL,
 		RefreshTTL: refreshTTL,
