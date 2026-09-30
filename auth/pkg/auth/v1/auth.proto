@@ -35,6 +35,10 @@ service AuthService {
       body: "*"
     };
   }
+
+  // Внутренний метод (без HTTP) для gateway: проверяет подпись, срок и отзыв access-токена
+  // и возвращает, чей он. Невалидный, истёкший или отозванный токен — UNAUTHENTICATED.
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
 }
 
 message LogInRequest {
@@ -69,3 +73,11 @@ message LogoutAllRequest {
 }
 
 message LogoutAllResponse {}
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  string user_id = 1;  // UUID
+}
