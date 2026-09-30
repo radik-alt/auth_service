@@ -9,6 +9,7 @@ import (
 type AppConfig struct {
 	HTTPAddr     string
 	AuthGRPCAddr string
+	UserGRPCAddr string
 }
 
 func Load(path string) (*AppConfig, error) {
@@ -17,6 +18,7 @@ func Load(path string) (*AppConfig, error) {
 	cfg := &AppConfig{
 		HTTPAddr:     envOr("HTTP_ADDR", ":8080"),
 		AuthGRPCAddr: envOr("AUTH_GRPC_ADDR", "localhost:50051"),
+		UserGRPCAddr: envOr("USER_GRPC_ADDR", "localhost:50052"),
 	}
 
 	return cfg, nil

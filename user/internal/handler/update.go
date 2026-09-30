@@ -7,6 +7,8 @@ import (
 	"github.com/radik-alt/auth_service/user/internal/handler/convertor"
 	"github.com/radik-alt/auth_service/user/internal/model"
 	userv1 "github.com/radik-alt/auth_service/user/pkg/user/v1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (handler *userHandler) UpdateUser(
@@ -19,6 +21,14 @@ func (handler *userHandler) UpdateUser(
 	userID := request.GetUser().GetUserId()
 	if err := validateUserID(userID); err != nil {
 		return nil, err
+	}
+
+	caller, err := callerID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if caller != userID {
+		return nil, status.Error(codes.PermissionDenied, "cannot modify another user")
 	}
 
 	params, err := buildUpdateParams(request.GetUser(), request.GetUpdateMask().GetPaths())

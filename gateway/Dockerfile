@@ -13,6 +13,7 @@ COPY user/go.mod user/go.sum ./user/
 
 # gateway импортирует auth/pkg через go.work, поэтому нужен и код auth
 COPY auth/ ./auth/
+COPY user/pkg/ ./user/pkg/
 COPY gateway/ ./gateway/
 
 RUN --mount=type=cache,target=/go/pkg/mod \
