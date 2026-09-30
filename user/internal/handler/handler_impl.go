@@ -1,9 +1,9 @@
 package handler
 
-import "github.com/radik-alt/auth_service/user/proto"
+import userv1 "github.com/radik-alt/auth_service/user/pkg/user/v1"
 
 type userHandler struct {
-	*proto.UnimplementedUserServiceServer
+	*userv1.UnimplementedUserServiceServer
 }
 
 func NewUserHandler() userHandler {

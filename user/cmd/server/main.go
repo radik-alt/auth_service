@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/radik-alt/auth_service/user/internal/config"
-	proto "github.com/radik-alt/auth_service/user/proto"
+	userv1 "github.com/radik-alt/auth_service/user/pkg/user/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"
@@ -15,6 +15,6 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	proto.RegisterUserServiceServer(grpcServer, nil)
+	userv1.RegisterUserServiceServer(grpcServer, nil)
 	reflection.Register(grpcServer)
 }
