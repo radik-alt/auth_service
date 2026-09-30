@@ -17,4 +17,6 @@ var (
 type UserRepository interface {
 	CreateUser(ctx context.Context, param model.CreateUserParams) (*model.User, error)
 	UpdateUser(ctx context.Context, userID string, params model.UpdateUserParams) (*model.User, error)
+	// GetByEmail ищет среди неудалённых; email должен быть уже в нижнем регистре. ErrNotFound — не найден.
+	GetByEmail(ctx context.Context, email string) (*model.User, error)
 }

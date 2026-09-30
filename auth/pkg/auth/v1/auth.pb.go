@@ -24,7 +24,8 @@ const (
 
 type LogInRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        uint64                 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,11 +60,18 @@ func (*LogInRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_auth_v1_auth_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LogInRequest) GetUserId() uint64 {
+func (x *LogInRequest) GetEmail() string {
 	if x != nil {
-		return x.UserId
+		return x.Email
 	}
-	return 0
+	return ""
+}
+
+func (x *LogInRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
 }
 
 type AuthResponse struct {
@@ -350,9 +358,10 @@ var File_pkg_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_pkg_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x16pkg/auth/v1/auth.proto\x12\x04auth\x1a\x1cgoogle/api/annotations.proto\"'\n" +
-	"\fLogInRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x04R\x06userId\"\x94\x01\n" +
+	"\x16pkg/auth/v1/auth.proto\x12\x04auth\x1a\x1cgoogle/api/annotations.proto\"O\n" +
+	"\fLogInRequest\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpasswordJ\x04\b\x01\x10\x02R\auser_id\"\x94\x01\n" +
 	"\fAuthResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +

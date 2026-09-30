@@ -34,7 +34,6 @@ func (handler *userHandler) UpdateUser(
 	return convertor.MapUserToProto(user), nil
 }
 
-// buildUpdateParams переносит в params только поля из update_mask; остальные остаются nil («не менять»).
 func buildUpdateParams(user *userv1.User, paths []string) (model.UpdateUserParams, error) {
 	var params model.UpdateUserParams
 

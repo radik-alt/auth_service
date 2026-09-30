@@ -12,11 +12,12 @@ import (
 const minJWTSecretLen = 32
 
 type Config struct {
-	GRPCAddr   string
-	RedisAddr  string
-	JWTSecret  string
-	AccessTTL  time.Duration
-	RefreshTTL time.Duration
+	GRPCAddr     string
+	RedisAddr    string
+	UserGRPCAddr string
+	JWTSecret    string
+	AccessTTL    time.Duration
+	RefreshTTL   time.Duration
 }
 
 // Option — функция, модифицирующая уже собранный Config
@@ -31,6 +32,12 @@ func WithGRPCAddr(addr string) Option {
 func WithRedisAddr(addr string) Option {
 	return func(c *Config) {
 		c.RedisAddr = addr
+	}
+}
+
+func WithUserGRPCAddr(addr string) Option {
+	return func(c *Config) {
+		c.UserGRPCAddr = addr
 	}
 }
 
@@ -66,11 +73,12 @@ func Load(path string, opts ...Option) (*Config, error) {
 	}
 
 	cfg := &Config{
-		GRPCAddr:   envOr("GRPC_ADDR", ":50051"),
-		RedisAddr:  envOr("REDIS_ADDR", "localhost:6379"),
-		JWTSecret:  os.Getenv("JWT_SECRET"),
-		AccessTTL:  accessTTL,
-		RefreshTTL: refreshTTL,
+		GRPCAddr:     envOr("GRPC_ADDR", ":50051"),
+		RedisAddr:    envOr("REDIS_ADDR", "localhost:6379"),
+		UserGRPCAddr: envOr("USER_GRPC_ADDR", "localhost:50052"),
+		JWTSecret:    os.Getenv("JWT_SECRET"),
+		AccessTTL:    accessTTL,
+		RefreshTTL:   refreshTTL,
 	}
 
 	for _, opt := range opts {
@@ -88,6 +96,9 @@ func Load(path string, opts ...Option) (*Config, error) {
 	}
 	if cfg.RedisAddr == "" {
 		return nil, fmt.Errorf("REDIS_ADDR is required")
+	}
+	if cfg.UserGRPCAddr == "" {
+		return nil, fmt.Errorf("USER_GRPC_ADDR is required")
 	}
 
 	return cfg, nil

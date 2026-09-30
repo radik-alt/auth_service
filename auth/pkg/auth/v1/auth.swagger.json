@@ -167,9 +167,11 @@
     "authLogInRequest": {
       "type": "object",
       "properties": {
-        "userId": {
-          "type": "string",
-          "format": "uint64"
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
         }
       }
     },

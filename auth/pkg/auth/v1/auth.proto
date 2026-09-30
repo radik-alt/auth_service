@@ -38,7 +38,12 @@ service AuthService {
 }
 
 message LogInRequest {
-  uint64 user_id = 1;
+  // раньше здесь был uint64 user_id: номер и имя не переиспользуем
+  reserved 1;
+  reserved "user_id";
+
+  string email = 2;
+  string password = 3;
 }
 
 message AuthResponse {

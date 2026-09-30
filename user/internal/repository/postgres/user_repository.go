@@ -82,6 +82,28 @@ func (r *userRepo) UpdateUser(ctx context.Context, userID string, params model.U
 	return &u, nil
 }
 
+func (r *userRepo) GetByEmail(ctx context.Context, email string) (*model.User, error) {
+	query := `
+		SELECT ` + userColumns + `
+		FROM users
+		WHERE email = $1 AND deleted_at IS NULL`
+
+	var u model.User
+	err := r.pool.QueryRow(ctx, query, email).Scan(
+		&u.ID, &u.Email, &u.Username, &u.Phone, &u.AvatarURL, &u.Bio, &u.PasswordHash,
+		&u.Status, &u.EmailVerified, &u.CreatedAt, &u.UpdatedAt, &u.DeletedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+
+		return nil, fmt.Errorf("get user by email: %w", err)
+	}
+
+	return &u, nil
+}
+
 func mapUniqueViolation(err error) error {
 	var pgErr *pgconn.PgError
 	if !errors.As(err, &pgErr) || pgErr.Code != uniqueViolationCode {

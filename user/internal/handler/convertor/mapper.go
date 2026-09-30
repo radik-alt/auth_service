@@ -26,6 +26,17 @@ func MapUserToProto(user *model.User) *userv1.User {
 	}
 }
 
+func MapVerifyCredentialsToProto(user *model.User) *userv1.VerifyCredentialsResponse {
+	if user == nil {
+		return &userv1.VerifyCredentialsResponse{}
+	}
+
+	return &userv1.VerifyCredentialsResponse{
+		UserId: user.ID,
+		Status: mapStatusToProto(user.Status),
+	}
+}
+
 func mapStatusToProto(status model.UserStatus) userv1.UserStatus {
 	switch status {
 	case model.UserStatusActive:

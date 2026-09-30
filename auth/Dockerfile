@@ -12,6 +12,8 @@ COPY gateway/go.mod ./gateway/
 COPY user/go.mod user/go.sum ./user/
 
 COPY auth/ ./auth/
+# auth импортирует сгенерированный gRPC-клиент user-сервиса
+COPY user/pkg/ ./user/pkg/
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \

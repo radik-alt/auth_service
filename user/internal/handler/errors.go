@@ -17,6 +17,10 @@ func toStatusError(err error) error {
 		errors.Is(err, service.ErrUsernameTaken),
 		errors.Is(err, service.ErrPhoneTaken):
 		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, service.ErrInvalidCredentials):
+		return status.Error(codes.Unauthenticated, err.Error())
+	case errors.Is(err, service.ErrUserBlocked):
+		return status.Error(codes.PermissionDenied, err.Error())
 	}
 
 	log.Printf("internal error: %v", err)

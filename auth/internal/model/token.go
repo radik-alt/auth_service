@@ -12,7 +12,7 @@ type TokenPair struct {
 // RefreshToken — DB-модель хранения refresh-токенов
 type RefreshToken struct {
 	ID        string
-	UserID    uint64
+	UserID    string // UUID из user-сервиса
 	TokenHash string // SHA-256 от сырого токена
 	ExpiresAt time.Time
 	CreatedAt time.Time

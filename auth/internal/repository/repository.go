@@ -18,7 +18,7 @@ type TokenRepository interface {
 	// DeleteByTokenHash не возвращает ошибку, если токена уже нет.
 	DeleteByTokenHash(ctx context.Context, tokenHash string) error
 	// DeleteAllByUser удаляет все сессии пользователя и возвращает удалённые записи.
-	DeleteAllByUser(ctx context.Context, userID uint64) ([]*model.RefreshToken, error)
+	DeleteAllByUser(ctx context.Context, userID string) ([]*model.RefreshToken, error)
 }
 
 // TokenBlacklist хранит отозванные access-токены (по их jti) до истечения их TTL.
