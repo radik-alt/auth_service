@@ -20,6 +20,7 @@ services:
     environment:
       GRPC_ADDR: ":50051"
       REDIS_ADDR: "redis:6379"
+      USER_GRPC_ADDR: "user:50051"
     ports:
       - "50051:50051"
     depends_on:
@@ -41,7 +42,6 @@ services:
     restart: unless-stopped
 
   postgres:
-    profiles: ["wip"]
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: user
@@ -57,25 +57,29 @@ services:
       timeout: 3s
       retries: 5
 
-  user:
-    profiles: ["wip"]
-    build:
-      context: .
-      dockerfile: user/Dockerfile
-    env_file:
-      - path: user/.env # JWT_SECRET
-        required: false
-    environment:
-      GRPC_ADDR: ":50051"
-      DATABASE_URL: "postgres://user:user@postgres:5432/users?sslmode=disable"
-      REDIS_ADDR: "redis:6380"
-    ports:
-      - "50052:50051"
+  # одноразовый контейнер: применяет миграции и завершается
+  user-migrate:
+    image: migrate/migrate:v4.18.3
+    volumes:
+      - ./user/migrations:/migrations:ro
+    command: ["-path", "/migrations", "-database", "postgres://user:user@postgres:5432/users?sslmode=disable", "up"]
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+
+  user:
+    build:
+      context: .
+      dockerfile: user/Dockerfile
+    environment:
+      GRPC_ADDR: ":50051"
+      DATABASE_URL: "postgres://user:user@postgres:5432/users?sslmode=disable"
+    ports:
+      - "50052:50051"
+    depends_on:
+      user-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
 
 volumes:
   redis-data:

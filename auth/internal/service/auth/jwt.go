@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,11 +10,11 @@ import (
 )
 
 type accessClaims struct {
-	UserID uint64 `json:"user_id"`
+	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func (s *authService) generateAccessToken(userID uint64) (token string, jti string, expiresAt time.Time, err error) {
+func (s *authService) generateAccessToken(userID string) (token string, jti string, expiresAt time.Time, err error) {
 	jti = uuid.NewString()
 	now := time.Now()
 	expiresAt = now.Add(s.accessTTL)
@@ -24,7 +23,7 @@ func (s *authService) generateAccessToken(userID uint64) (token string, jti stri
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
-			Subject:   strconv.FormatUint(userID, 10),
+			Subject:   userID,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},

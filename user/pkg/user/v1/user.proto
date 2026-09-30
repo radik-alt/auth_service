@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/radik-alt/auth_service/user/pkg/user/v1;userv1";
+
+// UserService — владелец данных пользователя и его учётных данных (password_hash).
+// Сервис ни от кого не зависит: токены выдаёт Auth, он же вызывает VerifyCredentials при логине.
+//
+// Ошибки (gRPC codes):
+//   INVALID_ARGUMENT    — невалидные поля запроса
+//   NOT_FOUND           — пользователь не найден (или удалён)
+//   ALREADY_EXISTS      — email или username уже заняты
+//   UNAUTHENTICATED     — неверные email/пароль в VerifyCredentials
+//   PERMISSION_DENIED   — пользователь заблокирован
+//   FAILED_PRECONDITION — неверный old_password в ChangePassword
+service UserService {
+
+  // ============================================
+  // Публичные методы (доступны через gateway)
+  // ============================================
+
+  // Регистрация пользователя. Токены не выдаёт — это делает Auth.
+  rpc CreateUser(CreateUserRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{user_id}"
+    };
+  }
+
+  // Частичное обновление профиля по update_mask.
+  rpc UpdateUser(UpdateUserRequest) returns (User) {
+    option (google.api.http) = {
+      patch: "/api/v1/users/{user.user_id}"
+      body: "user"
+    };
+  }
+
+  // Мягкое удаление: статус меняется на USER_STATUS_DELETED.
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/users/{user_id}"
+    };
+  }
+
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/users/{user_id}/password"
+      body: "*"
+    };
+  }
+
+  // ============================================
+  // Внутренние методы (service-to-service, без HTTP)
+  // ============================================
+
+  // Проверка учётных данных для Auth.
+  // При неверном email и при неверном пароле возвращается одна и та же ошибка UNAUTHENTICATED,
+  // чтобы нельзя было перебором узнать, какие email зарегистрированы.
+  rpc VerifyCredentials(VerifyCredentialsRequest) returns (VerifyCredentialsResponse);
+
+  // Список пользователей (админка). Курсорная пагинация.
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_BLOCKED = 2;
+  USER_STATUS_DELETED = 3;
+}
+
+// Пароль и его хеш никогда не отдаются наружу.
+message User {
+  string user_id = 1;                         // UUID, output only
+  string email = 2;
+  string username = 3;
+  optional string phone = 4;                  // E.164, например +79991234567
+  string avatar_url = 5;
+  string bio = 6;
+  UserStatus status = 7;                      // output only
+  bool email_verified = 8;                    // output only
+  google.protobuf.Timestamp created_at = 9;   // output only
+  google.protobuf.Timestamp updated_at = 10;  // output only
+}
+
+// ============================================
+// CREATE USER
+// ============================================
+
+message CreateUserRequest {
+  string email = 1;           // обязательное, валидный email
+  string password = 2;        // обязательное, минимум 8 символов
+  string username = 3;        // обязательное, 3–32 символа
+  optional string phone = 4;  // E.164
+}
+
+// ============================================
+// GET USER
+// ============================================
+
+message GetUserRequest {
+  string user_id = 1;  // UUID
+}
+
+// ============================================
+// UPDATE USER
+// ============================================
+
+message UpdateUserRequest {
+  // user.user_id обязателен, остальные поля берутся согласно update_mask.
+  User user = 1;
+
+  // Разрешённые пути: username, phone, avatar_url, bio.
+  // email и пароль меняются отдельными сценариями (требуют подтверждения).
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+// ============================================
+// DELETE USER
+// ============================================
+
+message DeleteUserRequest {
+  string user_id = 1;  // UUID
+}
+
+// ============================================
+// CHANGE PASSWORD
+// ============================================
+
+message ChangePasswordRequest {
+  string user_id = 1;       // UUID
+  string old_password = 2;
+  string new_password = 3;  // минимум 8 символов
+}
+
+// ============================================
+// VERIFY CREDENTIALS (internal)
+// ============================================
+
+message VerifyCredentialsRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message VerifyCredentialsResponse {
+  string user_id = 1;  // UUID
+  UserStatus status = 2;
+}
+
+// ============================================
+// LIST USERS (internal)
+// ============================================
+
+message ListUsersRequest {
+  int32 page_size = 1;    // по умолчанию 50, максимум 100
+  string page_token = 2;  // next_page_token из предыдущего ответа, пусто для первой страницы
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  string next_page_token = 2;  // пусто, если страниц больше нет
+}

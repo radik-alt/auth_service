@@ -11,7 +11,7 @@ import (
 
 /* issueTokenPair выпускает пару access/refresh и сохраняет сессию (общий код LogIn и RefreshToken).
  */
-func (s *authService) issueTokenPair(ctx context.Context, userID uint64) (*model.TokenPair, error) {
+func (s *authService) issueTokenPair(ctx context.Context, userID string) (*model.TokenPair, error) {
 	accessToken, jti, accessExpiresAt, err := s.generateAccessToken(userID)
 	if err != nil {
 		return nil, err

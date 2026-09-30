@@ -10,8 +10,16 @@ import (
 )
 
 func toStatusError(err error) error {
-	if errors.Is(err, service.ErrInvalidToken) {
+	switch {
+	case errors.Is(err, service.ErrInvalidToken):
 		return status.Error(codes.Unauthenticated, "invalid or expired token")
+	case errors.Is(err, service.ErrInvalidCredentials):
+		return status.Error(codes.Unauthenticated, "invalid email or password")
+	case errors.Is(err, service.ErrUserBlocked):
+		return status.Error(codes.PermissionDenied, "user is blocked")
+	case errors.Is(err, service.ErrUserServiceUnavailable):
+		log.Printf("login: %v", err)
+		return status.Error(codes.Unavailable, "service temporarily unavailable")
 	}
 
 	log.Printf("internal error: %v", err)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/radik-alt/auth_service/auth/internal/model"
@@ -19,8 +18,8 @@ const (
 )
 
 // userSessionsKey — множество хэшей refresh-токенов пользователя (индекс «пользователь -> сессии»).
-func userSessionsKey(userID uint64) string {
-	return userSessionsKeyPrefix + strconv.FormatUint(userID, 10)
+func userSessionsKey(userID string) string {
+	return userSessionsKeyPrefix + userID
 }
 
 type refreshTokenRepository struct {
@@ -92,7 +91,7 @@ func (r *refreshTokenRepository) DeleteByTokenHash(ctx context.Context, tokenHas
 	return nil
 }
 
-func (r *refreshTokenRepository) DeleteAllByUser(ctx context.Context, userID uint64) ([]*model.RefreshToken, error) {
+func (r *refreshTokenRepository) DeleteAllByUser(ctx context.Context, userID string) ([]*model.RefreshToken, error) {
 	index := userSessionsKey(userID)
 
 	// Снимок индекса и его удаление в одной транзакции: сессия, созданная позже, попадёт уже в новый индекс.
